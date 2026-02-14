@@ -217,7 +217,9 @@
         </template>
       </Button>
     </div>
-    <template v-if="!isCollapsed && !isRerouteNode && nodeData.resizable !== false">
+    <template
+      v-if="!isCollapsed && !isRerouteNode && nodeData.resizable !== false"
+    >
       <div
         v-for="handle in RESIZE_HANDLES"
         :key="handle.corner"
