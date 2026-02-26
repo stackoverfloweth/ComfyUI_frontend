@@ -225,6 +225,7 @@
     "login": {
       "andText": "e",
       "backToLogin": "Voltar para login",
+      "backToSocialLogin": "Cadastre-se com Google ou Github em vez disso",
       "confirmPasswordLabel": "Confirmar senha",
       "confirmPasswordPlaceholder": "Digite a mesma senha novamente",
       "didntReceiveEmail": "Não recebeu o e-mail? Entre em contato conosco em",
@@ -233,6 +234,9 @@
       "failed": "Falha no login",
       "forgotPassword": "Esqueceu a senha?",
       "forgotPasswordError": "Falha ao enviar e-mail de redefinição de senha",
+      "freeTierBadge": "Elegível para o Plano Gratuito",
+      "freeTierDescription": "Cadastre-se com Google para ganhar {credits} créditos gratuitos todo mês. Não precisa de cartão.",
+      "freeTierDescriptionGeneric": "Cadastre-se com Google para ganhar créditos gratuitos todo mês. Não precisa de cartão.",
       "insecureContextWarning": "Esta conexão é insegura (HTTP) - suas credenciais podem ser interceptadas por invasores se você continuar.",
       "loginButton": "Entrar",
       "loginWithGithub": "Entrar com Github",
@@ -251,11 +255,13 @@
       "sendResetLink": "Enviar link de redefinição",
       "signInOrSignUp": "Entrar / Cadastrar-se",
       "signUp": "Cadastrar-se",
+      "signUpFreeTierPromo": "Novo por aqui? {signUp} com Google para ganhar {credits} créditos gratuitos todo mês.",
       "success": "Login realizado com sucesso",
       "termsLink": "Termos de Uso",
       "termsText": "Ao clicar em \"Próximo\" ou \"Cadastrar-se\", você concorda com nossos",
       "title": "Faça login na sua conta",
       "useApiKey": "Chave de API Comfy",
+      "useEmailInstead": "Usar e-mail em vez disso",
       "userAvatar": "Avatar do usuário"
     },
     "loginButton": {
@@ -282,6 +288,7 @@
     "signup": {
       "alreadyHaveAccount": "Já tem uma conta?",
       "emailLabel": "E-mail",
+      "emailNotEligibleForFreeTier": "Cadastro por e-mail não é elegível para o Plano Gratuito.",
       "emailPlaceholder": "Digite seu e-mail",
       "passwordLabel": "Senha",
       "passwordPlaceholder": "Digite uma nova senha",
@@ -293,6 +300,9 @@
       "signUpWithGoogle": "Cadastrar-se com Google",
       "title": "Criar uma conta"
     }
+  },
+  "batch": {
+    "index": "{current} / {total}"
   },
   "billingOperation": {
     "subscriptionFailed": "Falha ao atualizar a assinatura",
@@ -315,8 +325,36 @@
     "deleteBlueprint": "Excluir Blueprint",
     "deleteWorkflow": "Excluir Fluxo de Trabalho",
     "duplicate": "Duplicar",
+    "enterAppMode": "Entrar no modo de aplicativo",
     "enterNewName": "Digite um novo nome",
-    "missingNodesWarning": "O fluxo de trabalho contém nós não suportados (destacados em vermelho)."
+    "exitAppMode": "Sair do modo de aplicativo",
+    "missingNodesWarning": "O fluxo de trabalho contém nós não suportados (destacados em vermelho).",
+    "workflowActions": "Ações do fluxo de trabalho"
+  },
+  "builderToolbar": {
+    "app": "Aplicativo",
+    "appDescription": "Abre como aplicativo por padrão",
+    "arrange": "Pré-visualizar",
+    "arrangeDescription": "Revisar layout do aplicativo",
+    "connectOutput": "Conectar uma saída",
+    "connectOutputBody1": "Seu aplicativo precisa de pelo menos uma saída conectada antes de ser salvo.",
+    "connectOutputBody2": "Altere para a etapa 'Selecionar' e clique nos nós de saída para adicioná-los aqui.",
+    "filename": "Nome do arquivo",
+    "label": "Construtor de aplicativos",
+    "nodeGraph": "Grafo de nós",
+    "nodeGraphDescription": "Abre como grafo de nós por padrão",
+    "save": "Salvar",
+    "saveAs": "Salvar como",
+    "saveAsLabel": "Salvar este fluxo de trabalho como ...",
+    "saveDescription": "Salvar e finalizar",
+    "saveSuccess": "Salvo com sucesso",
+    "saveSuccessAppMessage": "'{name}' foi salvo. Ele abrirá no Modo de Aplicativo por padrão a partir de agora.",
+    "saveSuccessAppPrompt": "Gostaria de visualizá-lo agora?",
+    "saveSuccessGraphMessage": "'{name}' foi salvo. Ele abrirá como grafo de nós por padrão.",
+    "select": "Selecionar",
+    "selectDescription": "Escolha entradas/saídas",
+    "switchToSelect": "Ir para Selecionar",
+    "viewApp": "Visualizar aplicativo"
   },
   "clipboard": {
     "errorMessage": "Falha ao copiar para a área de transferência",
@@ -879,6 +917,7 @@
     "enableSelected": "Ativar selecionados",
     "enabled": "Ativado",
     "enabling": "Ativando {id}",
+    "enter": "Entrar",
     "enterBaseName": "Digite o nome base",
     "enterNewName": "Digite o novo nome",
     "enterNewNamePrompt": "Digite o novo nome:",
@@ -1149,6 +1188,8 @@
     "star": "Estrela"
   },
   "imageCompare": {
+    "batchLabelA": "A:",
+    "batchLabelB": "B:",
     "noImages": "Nenhuma imagem para comparar"
   },
   "imageCrop": {
@@ -1282,7 +1323,35 @@
     "helpFix": "Ajude a Corrigir Isto"
   },
   "linearMode": {
+    "appModeToolbar": {
+      "appBuilder": "Construtor de aplicativos",
+      "apps": "Aplicativos"
+    },
+    "arrange": {
+      "atLeastOne": "pelo menos um",
+      "connectAtLeastOne": "Conecte {atLeastOne} nó de saída para que os usuários possam ver os resultados após a execução.",
+      "noOutputs": "Nenhuma saída adicionada ainda",
+      "outputExamples": "Exemplos: 'Salvar imagem' ou 'Salvar vídeo'",
+      "outputs": "Saídas",
+      "resultsLabel": "Os resultados gerados pelo(s) nó(s) de saída selecionado(s) serão exibidos aqui após a execução deste aplicativo",
+      "switchToSelect": "Altere para a etapa 'Selecionar' e clique nos nós de saída para adicioná-los aqui.",
+      "switchToSelectButton": "Ir para Selecionar"
+    },
     "beta": "Modo App Beta - Envie seu feedback",
+    "builder": {
+      "exit": "Sair do construtor",
+      "exitConfirmMessage": "Você tem alterações não salvas que serão perdidas\nSair sem salvar?",
+      "exitConfirmTitle": "Sair do construtor de app?",
+      "inputsDesc": "Os usuários irão interagir e ajustar estes para gerar seus resultados.",
+      "inputsExample": "Exemplos: “Carregar imagem”, “Prompt de texto”, “Passos”",
+      "noInputs": "Nenhuma entrada adicionada ainda",
+      "noOutputs": "Nenhum nó de saída adicionado ainda",
+      "outputsDesc": "Conecte pelo menos um nó de saída para que os usuários vejam os resultados após executar.",
+      "outputsExample": "Exemplos: “Salvar imagem” ou “Salvar vídeo”",
+      "promptAddInputs": "Clique nos parâmetros do nó para adicioná-los aqui como entradas",
+      "promptAddOutputs": "Clique nos nós de saída para adicioná-los aqui. Estes serão os resultados gerados.",
+      "title": "Modo construtor de app"
+    },
     "downloadAll": "Baixar tudo",
     "dragAndDropImage": "Arraste e solte uma imagem",
     "graphMode": "Modo Gráfico",
@@ -1291,11 +1360,13 @@
     "reuseParameters": "Reutilizar parâmetros",
     "runCount": "Número de execuções:",
     "welcome": {
-      "intro": "Uma visualização simplificada que oculta o grafo de nós para você focar na criação.",
-      "layout": "À esquerda, você verá suas imagens, vídeos e saídas geradas. À direita, apenas os controles necessários. Tudo que é complexo fica fora de vista.",
+      "backToWorkflow": "Voltar ao fluxo de trabalho",
+      "buildApp": "Criar aplicativo",
+      "controls": "Seus resultados aparecem na parte inferior, seus controles estão à direita. Todo o resto fica fora do caminho.",
+      "getStarted": "Clique em {runButton} para começar.",
+      "message": "Uma visualização simplificada que oculta o grafo de nós para você focar na criação.",
       "sharing": "Compartilhar é fácil: crie seu fluxo de trabalho, abra o Modo App, clique com o botão direito na aba e exporte. Quando outros abrirem seu arquivo, ele será iniciado diretamente nesta visualização limpa. Você pode compartilhar fluxos de trabalho poderosos como ferramentas simples, sem que ninguém precise entender grafos de nós.",
-      "title": "Bem-vindo ao Modo App",
-      "widget": "Se quiser controlar quais configurações aparecem, converta seus nós de nível superior em um subgrafo e use a promoção de widgets na caixa de ferramentas acima dele para escolher o que será exposto."
+      "title": "Bem-vindo ao Modo App"
     }
   },
   "load3d": {
@@ -1818,11 +1889,18 @@
     "showLinks": "Mostrar Conexões"
   },
   "missingModelsDialog": {
+    "customModelsInstruction": "Você precisará encontrá-los e baixá-los manualmente. Procure por eles online (tente Civitai ou Hugging Face) ou entre em contato com o provedor original do fluxo de trabalho.",
+    "customModelsWarning": "Alguns desses são modelos personalizados que não reconhecemos.",
+    "description": "Este fluxo de trabalho requer modelos que você ainda não baixou.",
     "doNotAskAgain": "Não mostrar novamente",
-    "missingModels": "Modelos ausentes",
-    "missingModelsMessage": "Ao carregar o grafo, os seguintes modelos não foram encontrados",
+    "downloadAll": "Baixar todos",
+    "downloadAvailable": "Baixar disponíveis",
+    "footerDescription": "Baixe e coloque esses modelos na pasta correta.\nNós com modelos ausentes estão destacados em vermelho no canvas.",
+    "gotIt": "Ok, entendi",
     "reEnableInSettings": "Reativar em {link}",
-    "reEnableInSettingsLink": "Configurações"
+    "reEnableInSettingsLink": "Configurações",
+    "title": "Este fluxo de trabalho está sem modelos",
+    "totalSize": "Tamanho total do download:"
   },
   "missingNodes": {
     "cloud": {
@@ -1844,6 +1922,14 @@
       "label": "Versão de Prévia",
       "tooltip": "Você está usando uma versão nightly do ComfyUI. Por favor, use o botão de feedback para compartilhar suas opiniões sobre esses recursos."
     }
+  },
+  "nightlySurvey": {
+    "accept": "Claro, vou ajudar!",
+    "description": "Você tem usado este recurso. Pode dedicar um momento para compartilhar seu feedback?",
+    "dontAskAgain": "Não perguntar novamente",
+    "loadError": "Falha ao carregar a pesquisa. Por favor, tente novamente mais tarde.",
+    "notNow": "Agora não",
+    "title": "Ajude-nos a melhorar"
   },
   "nodeCategories": {
     "": "",
@@ -2611,14 +2697,17 @@
     "cannotDeleteGlobal": "Não é possível excluir blueprints instalados",
     "confirmDelete": "Esta ação removerá permanentemente o blueprint da sua biblioteca",
     "confirmDeleteTitle": "Excluir blueprint?",
+    "disconnected": "Desconectado",
     "enterDescription": "Insira uma descrição",
     "enterSearchAliases": "Insira apelidos de busca (separados por vírgula)",
     "hidden": "Parâmetros ocultos/aninhados",
     "hideAll": "Ocultar tudo",
+    "linked": "(Vinculado)",
     "loadFailure": "Falha ao carregar blueprints de subgrafo",
     "overwriteBlueprint": "Salvar irá sobrescrever o blueprint atual com suas alterações",
     "overwriteBlueprintTitle": "Sobrescrever blueprint existente?",
     "promoteOutsideSubgraph": "Não é possível promover o widget fora do subgrafo",
+    "promoteWidget": "Promover Widget: {name}",
     "publish": "Publicar Subgrafo",
     "publishSuccess": "Salvo na Biblioteca de Nós",
     "publishSuccessMessage": "Você pode encontrar seu blueprint de subgrafo na biblioteca de nós em \"Blueprints de Subgrafo\"",
@@ -2626,7 +2715,8 @@
     "searchAliases": "Buscar Apelidos",
     "showAll": "Mostrar tudo",
     "showRecommended": "Mostrar widgets recomendados",
-    "shown": "Exibido no nó"
+    "shown": "Exibido no nó",
+    "unpromoteWidget": "Despromover Widget: {name}"
   },
   "subscription": {
     "addApiCredits": "Adicionar créditos de API",
@@ -2634,7 +2724,9 @@
     "addCreditsLabel": "Adicione mais créditos quando quiser",
     "benefits": {
       "benefit1": "$10 em créditos mensais para Partner Nodes — recarregue quando necessário",
-      "benefit2": "Até 30 min de execução por tarefa"
+      "benefit1FreeTier": "Mais créditos mensais, recarregue a qualquer momento",
+      "benefit2": "Até 30 min de execução por tarefa",
+      "benefit3": "Use seus próprios modelos (Creator & Pro)"
     },
     "beta": "BETA",
     "billedMonthly": "Cobrado mensalmente",
@@ -2672,6 +2764,21 @@
     "description": "Escolha o melhor plano para você",
     "descriptionWorkspace": "Escolha o melhor plano para seu workspace",
     "expiresDate": "Expira em {date}",
+    "freeTier": {
+      "description": "Seu plano gratuito inclui {credits} créditos por mês para testar o Comfy Cloud.",
+      "descriptionGeneric": "Seu plano gratuito inclui uma cota mensal de créditos para testar o Comfy Cloud.",
+      "nextRefresh": "Seus créditos serão renovados em {date}.",
+      "outOfCredits": {
+        "subtitle": "Assine para liberar recargas e mais benefícios",
+        "title": "Você ficou sem créditos gratuitos"
+      },
+      "subscribeCta": "Assine para mais",
+      "title": "Você está no plano Gratuito",
+      "topUpBlocked": {
+        "title": "Desbloqueie recargas e mais benefícios"
+      },
+      "upgradeCta": "Ver planos"
+    },
     "gpuLabel": "RTX 6000 Pro (96GB VRAM)",
     "haveQuestions": "Tem dúvidas ou interesse em soluções empresariais?",
     "invoiceHistory": "Histórico de faturas",
@@ -2682,6 +2789,7 @@
     "maxDuration": {
       "creator": "30 min",
       "founder": "30 min",
+      "free": "30 min",
       "pro": "1 h",
       "standard": "30 min"
     },
@@ -2753,6 +2861,9 @@
       },
       "founder": {
         "name": "Edição do Fundador"
+      },
+      "free": {
+        "name": "Gratuito"
       },
       "pro": {
         "name": "Pro"
@@ -2864,6 +2975,7 @@
     "emptyCanvas": "Tela vazia",
     "errorCopyImage": "Erro ao copiar imagem: {error}",
     "errorLoadingModel": "Erro ao carregar o modelo",
+    "errorOpenImage": "Erro ao abrir a imagem: {error}",
     "errorSaveSetting": "Erro ao salvar configuração {id}: {err}",
     "exportSuccess": "Modelo exportado com sucesso como {format}",
     "failedExecutionPathResolution": "Não foi possível resolver o caminho para os nós selecionados",
