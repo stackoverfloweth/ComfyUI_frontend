@@ -31,6 +31,7 @@ import { useNodeOutputStore } from '@/stores/imagePreviewStore'
 import { useJobPreviewStore } from '@/stores/jobPreviewStore'
 import { useExecutionErrorStore } from '@/stores/executionErrorStore'
 import type { NodeLocatorId } from '@/types/nodeIdentification'
+import { getDevOverride } from '@/utils/devFeatureFlagOverride'
 import { classifyCloudValidationError } from '@/utils/executionErrorUtil'
 import { executionIdToNodeLocatorId } from '@/utils/graphTraversalUtil'
 
@@ -44,6 +45,14 @@ interface QueuedJob {
    * The workflow that is queued to be executed
    */
   workflow?: ComfyWorkflow
+}
+
+function isLocatorCacheCounterEnabled(): boolean {
+  return (
+    getDevOverride<boolean>(
+      'expose_executionId_to_node_locator_id_cache_counters'
+    ) ?? false
+  )
 }
 
 export const useExecutionStore = defineStore('execution', () => {
@@ -103,6 +112,8 @@ export const useExecutionStore = defineStore('execution', () => {
     return locatorId
   }
 
+  let executionIdToLocatorCallCount = 0
+
   const mergeExecutionProgressStates = (
     currentState: NodeProgressState | undefined,
     newState: NodeProgressState
@@ -143,6 +154,9 @@ export const useExecutionStore = defineStore('execution', () => {
       for (let i = 0; i < parts.length; i++) {
         const executionId = parts.slice(0, i + 1).join(':')
         const locatorId = cachedExecutionIdToLocator(executionId)
+        if (isLocatorCacheCounterEnabled()) {
+          executionIdToLocatorCallCount++
+        }
         if (!locatorId) continue
 
         result[locatorId] = mergeExecutionProgressStates(
@@ -462,6 +476,12 @@ export const useExecutionStore = defineStore('execution', () => {
    */
   function resetExecutionState(jobIdParam?: string | null) {
     executionIdToLocatorCache.clear()
+    if (isLocatorCacheCounterEnabled() && executionIdToLocatorCallCount > 0) {
+      console.warn(
+        `[executionStore] executionIdToNodeLocatorId calls this run: ${executionIdToLocatorCallCount}`
+      )
+      executionIdToLocatorCallCount = 0
+    }
     nodeProgressStates.value = {}
     const jobId = jobIdParam ?? activeJobId.value ?? null
     if (jobId) {
