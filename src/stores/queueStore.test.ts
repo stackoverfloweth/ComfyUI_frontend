@@ -705,6 +705,51 @@ describe('useQueueStore', () => {
       await store.update()
       expect(store.lastHistoryQueueIndex).toBe(-1)
     })
+
+    it('tasks produces a new array reference when underlying arrays change', async () => {
+      mockGetQueue.mockResolvedValue({
+        Running: [createRunningJob(1, 'run-1')],
+        Pending: []
+      })
+      mockGetHistory.mockResolvedValue([])
+      await store.update()
+
+      const firstRef = store.tasks
+
+      mockGetQueue.mockResolvedValue({
+        Running: [createRunningJob(1, 'run-1')],
+        Pending: [createPendingJob(2, 'pend-1')]
+      })
+      mockGetHistory.mockResolvedValue([])
+      await store.update()
+
+      const secondRef = store.tasks
+      expect(secondRef).not.toBe(firstRef)
+      expect(secondRef).toHaveLength(2)
+    })
+
+    it('tasks reflects running-to-history transition without deep watching', async () => {
+      mockGetQueue.mockResolvedValue({
+        Running: [createRunningJob(1, 'job-1')],
+        Pending: []
+      })
+      mockGetHistory.mockResolvedValue([])
+      await store.update()
+
+      const beforeTransition = store.tasks
+      expect(beforeTransition).toHaveLength(1)
+      expect(beforeTransition[0].isRunning).toBe(true)
+
+      mockGetQueue.mockResolvedValue({ Running: [], Pending: [] })
+      mockGetHistory.mockResolvedValue([createHistoryJob(1, 'job-1')])
+      await store.update()
+
+      const afterTransition = store.tasks
+      expect(afterTransition).not.toBe(beforeTransition)
+      expect(afterTransition).toHaveLength(1)
+      expect(afterTransition[0].isHistory).toBe(true)
+      expect(afterTransition[0].jobId).toBe('job-1')
+    })
   })
 
   describe('clear()', () => {

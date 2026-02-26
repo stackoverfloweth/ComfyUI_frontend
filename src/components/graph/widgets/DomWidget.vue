@@ -97,9 +97,18 @@ const updateDomClipping = () => {
 }
 
 /**
- * @note mapping between canvas position and client position depends on the
- * canvas element's position, so we need to watch the canvas element's position
- * and update the position of the widget accordingly.
+ * Syncs the DOM widget's CSS position/style with litegraph canvas state.
+ *
+ * Watches only the specific leaf properties the callback reads rather than
+ * the entire `widgetState` object, avoiding a costly deep traversal on
+ * every canvas frame (~60 FPS during pan/zoom). `pos` and `size` are new
+ * array literals each frame; the remaining deps are primitives or a
+ * reference-replaced object (`positionOverride`).
+ *
+ * `left`/`top` from `useElementBounding` track the canvas element's
+ * viewport position so the client-coordinate conversion stays accurate.
+ *
+ * @note Do NOT add `{ deep: true }` — see commit history for rationale.
  */
 const { left, top } = useElementBounding(canvasStore.getCanvas().canvas)
 watch(

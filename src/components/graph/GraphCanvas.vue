@@ -365,7 +365,14 @@ watch(
   }
 )
 
-// Update the progress of executing nodes
+/**
+ * Propagates execution progress from the store to LiteGraph node objects
+ * and triggers a canvas redraw.
+ *
+ * No `deep: true` needed — `nodeLocationProgressStates` is a computed that
+ * returns a new `Record` object on every progress event (the underlying
+ * `nodeProgressStates` ref is replaced wholesale by the WebSocket handler).
+ */
 watch(
   () =>
     [executionStore.nodeLocationProgressStates, canvasStore.canvas] as const,

@@ -346,6 +346,138 @@ describe('useExecutionErrorStore - Node Error Lookups', () => {
   })
 })
 
+describe('useExecutionStore - nodeLocationProgressStates', () => {
+  let store: ReturnType<typeof useExecutionStore>
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    setActivePinia(createTestingPinia({ stubActions: false }))
+    store = useExecutionStore()
+  })
+
+  it('should recompute when nodeProgressStates is replaced wholesale', () => {
+    store.nodeProgressStates = {
+      '10': {
+        value: 3,
+        max: 10,
+        state: 'running',
+        node_id: '10',
+        prompt_id: 'job-1',
+        display_node_id: '10'
+      }
+    }
+
+    const first = store.nodeLocationProgressStates
+    expect(first).toHaveProperty('10')
+    expect(first['10'].state).toBe('running')
+
+    store.nodeProgressStates = {
+      '10': {
+        value: 10,
+        max: 10,
+        state: 'finished',
+        node_id: '10',
+        prompt_id: 'job-1',
+        display_node_id: '10'
+      }
+    }
+
+    const second = store.nodeLocationProgressStates
+    expect(second['10'].state).toBe('finished')
+    expect(second).not.toBe(first)
+  })
+
+  it('should return empty record when no progress states exist', () => {
+    expect(store.nodeLocationProgressStates).toEqual({})
+  })
+
+  it('should map multiple nodes in a single update', () => {
+    store.nodeProgressStates = {
+      '1': {
+        value: 5,
+        max: 10,
+        state: 'running',
+        node_id: '1',
+        prompt_id: 'job-1',
+        display_node_id: '1'
+      },
+      '2': {
+        value: 0,
+        max: 1,
+        state: 'pending',
+        node_id: '2',
+        prompt_id: 'job-1',
+        display_node_id: '2'
+      }
+    }
+
+    const result = store.nodeLocationProgressStates
+    expect(result).toHaveProperty('1')
+    expect(result).toHaveProperty('2')
+    expect(result['1'].state).toBe('running')
+    expect(result['2'].state).toBe('pending')
+  })
+
+  it('should produce a new object reference on each recomputation', () => {
+    store.nodeProgressStates = {
+      '1': {
+        value: 1,
+        max: 10,
+        state: 'running',
+        node_id: '1',
+        prompt_id: 'job-1',
+        display_node_id: '1'
+      }
+    }
+    const ref1 = store.nodeLocationProgressStates
+
+    store.nodeProgressStates = {
+      '1': {
+        value: 2,
+        max: 10,
+        state: 'running',
+        node_id: '1',
+        prompt_id: 'job-1',
+        display_node_id: '1'
+      }
+    }
+    const ref2 = store.nodeLocationProgressStates
+
+    expect(ref1).not.toBe(ref2)
+  })
+
+  it('should merge progress states for subgraph ancestor nodes', () => {
+    const mockSubgraph = {
+      id: 'sg-uuid',
+      nodes: []
+    }
+    const mockNode = createMockLGraphNode({
+      id: 5,
+      isSubgraphNode: () => true,
+      subgraph: mockSubgraph
+    })
+    vi.mocked(app.rootGraph.getNodeById).mockReturnValue(mockNode)
+
+    store.nodeProgressStates = {
+      '5:7': {
+        value: 3,
+        max: 10,
+        state: 'running',
+        node_id: '5:7',
+        prompt_id: 'job-1',
+        display_node_id: '5:7'
+      }
+    }
+
+    const result = store.nodeLocationProgressStates
+    // The ancestor (node 5) should also get an entry
+    expect(result).toHaveProperty('5')
+    expect(result['5'].state).toBe('running')
+    // The child (mapped through subgraph) should also be present
+    expect(result).toHaveProperty('sg-uuid:7')
+  })
+})
+
 describe('useExecutionErrorStore - setMissingNodeTypes', () => {
   let store: ReturnType<typeof useExecutionErrorStore>
 

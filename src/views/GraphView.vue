@@ -133,6 +133,14 @@ watch(
   { immediate: true }
 )
 
+/**
+ * Reports task completion telemetry to Electron analytics when tasks
+ * transition from running to history.
+ *
+ * No `deep: true` needed — `queueStore.tasks` is a computed that spreads
+ * three `shallowRef` arrays into a new array on every change, and
+ * `TaskItemImpl` instances are immutable (replaced, never mutated).
+ */
 if (isDesktop) {
   watch(
     () => queueStore.tasks,
