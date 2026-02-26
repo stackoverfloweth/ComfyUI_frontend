@@ -27,6 +27,8 @@
       "
       :placeholder
       :readonly="isReadOnly"
+      :spellcheck
+      data-testid="dom-widget-textarea"
       data-capture-wheel="true"
       @pointerdown.capture.stop
       @pointermove.capture.stop
@@ -40,6 +42,7 @@
 import { computed, useId } from 'vue'
 
 import Textarea from '@/components/ui/textarea/Textarea.vue'
+import { useSettingStore } from '@/platform/settings/settingStore'
 import type { SimplifiedWidget } from '@/types/simplifiedWidget'
 import { useHideLayoutField } from '@/types/widgetTypes'
 import { cn } from '@/utils/tailwindUtil'
@@ -68,5 +71,10 @@ const id = useId()
 
 const isReadOnly = computed(
   () => widget.options?.read_only ?? widget.options?.disabled ?? false
+)
+
+const settingStore = useSettingStore()
+const spellcheck = computed(() =>
+  settingStore.get('Comfy.TextareaWidget.Spellcheck')
 )
 </script>

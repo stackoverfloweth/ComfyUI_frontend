@@ -1,3 +1,4 @@
+import { createTestingPinia } from '@pinia/testing'
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 
@@ -26,6 +27,9 @@ function mountComponent(
   placeholder?: string
 ) {
   return mount(WidgetTextarea, {
+    global: {
+      plugins: [createTestingPinia()]
+    },
     props: {
       widget,
       modelValue,
