@@ -21,7 +21,7 @@
       :class="
         cn(
           WidgetInputBaseClass,
-          'size-full text-xs resize-none',
+          'comfy-multiline-input size-full text-xs resize-none',
           !hideLayoutField && 'pt-5'
         )
       "
