@@ -67,6 +67,42 @@ export const useExecutionStore = defineStore('execution', () => {
 
   const initializingJobIds = ref<Set<string>>(new Set())
 
+  /**
+   * Cache for executionIdToNodeLocatorId lookups.
+   * Avoids redundant graph traversals during a single execution run.
+   * Cleared at execution start ({@link handleExecutionStart}) and
+   * end ({@link resetExecutionState}) to ensure fresh graph state.
+   */
+  const executionIdToLocatorCache = new Map<string, NodeLocatorId | undefined>()
+
+  /**
+   * Resolves an execution ID to a NodeLocatorId, using the cache to avoid
+   * redundant graph traversals within a single execution run.
+   *
+   * @example
+   * ```ts
+   * cachedExecutionIdToLocator('123:456')
+   * // => 'a1b2c3d4-e5f6-7890-abcd-ef1234567890:456'
+   *
+   * // Second call with same ID returns cached result (no traversal)
+   * cachedExecutionIdToLocator('123:456')
+   * // => 'a1b2c3d4-e5f6-7890-abcd-ef1234567890:456'
+   * ```
+   *
+   * @param executionId - The execution ID to resolve
+   * @returns The NodeLocatorId, or undefined if resolution fails
+   */
+  function cachedExecutionIdToLocator(
+    executionId: string
+  ): NodeLocatorId | undefined {
+    if (executionIdToLocatorCache.has(executionId)) {
+      return executionIdToLocatorCache.get(executionId)
+    }
+    const locatorId = executionIdToNodeLocatorId(app.rootGraph, executionId)
+    executionIdToLocatorCache.set(executionId, locatorId)
+    return locatorId
+  }
+
   const mergeExecutionProgressStates = (
     currentState: NodeProgressState | undefined,
     newState: NodeProgressState
@@ -106,7 +142,7 @@ export const useExecutionStore = defineStore('execution', () => {
       const parts = String(state.display_node_id).split(':')
       for (let i = 0; i < parts.length; i++) {
         const executionId = parts.slice(0, i + 1).join(':')
-        const locatorId = executionIdToNodeLocatorId(app.rootGraph, executionId)
+        const locatorId = cachedExecutionIdToLocator(executionId)
         if (!locatorId) continue
 
         result[locatorId] = mergeExecutionProgressStates(
@@ -214,6 +250,7 @@ export const useExecutionStore = defineStore('execution', () => {
   }
 
   function handleExecutionStart(e: CustomEvent<ExecutionStartWsMessage>) {
+    executionIdToLocatorCache.clear()
     executionErrorStore.clearAllErrors()
     activeJobId.value = e.detail.prompt_id
     queuedJobs.value[activeJobId.value] ??= { nodes: {} }
@@ -424,6 +461,7 @@ export const useExecutionStore = defineStore('execution', () => {
    * Reset execution-related state after a run completes or is stopped.
    */
   function resetExecutionState(jobIdParam?: string | null) {
+    executionIdToLocatorCache.clear()
     nodeProgressStates.value = {}
     const jobId = jobIdParam ?? activeJobId.value ?? null
     if (jobId) {
