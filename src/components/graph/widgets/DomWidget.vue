@@ -103,8 +103,16 @@ const updateDomClipping = () => {
  */
 const { left, top } = useElementBounding(canvasStore.getCanvas().canvas)
 watch(
-  [() => widgetState, left, top],
-  ([widgetState, _, __]) => {
+  [
+    () => widgetState.pos,
+    () => widgetState.size,
+    () => widgetState.zIndex,
+    () => widgetState.readonly,
+    () => widgetState.positionOverride,
+    left,
+    top
+  ],
+  () => {
     updatePosition(widgetState)
     if (enableDomClipping.value) {
       updateDomClipping()
@@ -118,8 +126,7 @@ watch(
         widgetState.readonly || widget.computedDisabled ? 'none' : 'auto',
       opacity: widget.computedDisabled ? 0.5 : 1
     }
-  },
-  { deep: true }
+  }
 )
 
 watch(

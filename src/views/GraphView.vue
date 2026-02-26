@@ -152,8 +152,7 @@ if (isDesktop) {
             status: task.displayStatus.toLowerCase()
           })
         })
-    },
-    { deep: true }
+    }
   )
 }
 

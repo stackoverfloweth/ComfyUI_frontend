@@ -383,8 +383,7 @@ watch(
 
     // Force canvas redraw to ensure progress updates are visible
     canvas.setDirty(true, false)
-  },
-  { deep: true }
+  }
 )
 
 // Update node slot errors for LiteGraph nodes
