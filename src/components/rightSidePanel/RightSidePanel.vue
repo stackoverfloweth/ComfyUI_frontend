@@ -8,7 +8,6 @@ import Tab from '@/components/tab/Tab.vue'
 import TabList from '@/components/tab/TabList.vue'
 import Button from '@/components/ui/button/Button.vue'
 import { useGraphHierarchy } from '@/composables/graph/useGraphHierarchy'
-import type { ProxyWidgetsProperty } from '@/core/schemas/proxyWidget'
 import { st } from '@/i18n'
 import { SubgraphNode } from '@/lib/litegraph/src/litegraph'
 import type { LGraphNode } from '@/lib/litegraph/src/litegraph'
@@ -41,7 +40,8 @@ const rightSidePanelStore = useRightSidePanelStore()
 const settingStore = useSettingStore()
 const { t } = useI18n()
 
-const { hasAnyError, allErrorExecutionIds } = storeToRefs(executionErrorStore)
+const { hasAnyError, allErrorExecutionIds, activeMissingNodeGraphIds } =
+  storeToRefs(executionErrorStore)
 
 const { findParentGroup } = useGraphHierarchy()
 
@@ -106,13 +106,25 @@ const hasContainerInternalError = computed(() => {
   if (allErrorExecutionIds.value.length === 0) return false
   return selectedNodes.value.some((node) => {
     if (!(node instanceof SubgraphNode || isGroupNode(node))) return false
-    return executionErrorStore.hasInternalErrorForNode(node.id)
+    return executionErrorStore.isContainerWithInternalError(node)
   })
 })
 
+const hasMissingNodeSelected = computed(
+  () =>
+    hasSelection.value &&
+    selectedNodes.value.some((node) =>
+      activeMissingNodeGraphIds.value.has(String(node.id))
+    )
+)
+
 const hasRelevantErrors = computed(() => {
   if (!hasSelection.value) return hasAnyError.value
-  return hasDirectNodeError.value || hasContainerInternalError.value
+  return (
+    hasDirectNodeError.value ||
+    hasContainerInternalError.value ||
+    hasMissingNodeSelected.value
+  )
 })
 
 const tabs = computed<RightSidePanelTabList>(() => {
@@ -229,12 +241,6 @@ function handleTitleEdit(newTitle: string) {
 function handleTitleCancel() {
   isEditing.value = false
 }
-
-function handleProxyWidgetsUpdate(value: ProxyWidgetsProperty) {
-  if (!selectedSingleNode.value) return
-  ;(selectedSingleNode.value as SubgraphNode).properties.proxyWidgets = value
-  canvasStore.canvas?.setDirty(true, true)
-}
 </script>
 
 <template>
@@ -330,7 +336,6 @@ function handleProxyWidgetsUpdate(value: ProxyWidgetsProperty) {
         <TabSubgraphInputs
           v-if="activeTab === 'parameters' && isSingleSubgraphNode"
           :node="selectedSingleNode as SubgraphNode"
-          @update:proxy-widgets="handleProxyWidgetsUpdate"
         />
         <TabNormalInputs
           v-else-if="activeTab === 'parameters'"

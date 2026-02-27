@@ -6,7 +6,7 @@
     <template v-if="showUI" #workflow-tabs>
       <div
         v-if="workflowTabsPosition === 'Topbar'"
-        class="workflow-tabs-container pointer-events-auto relative h-9.5 w-full"
+        class="workflow-tabs-container pointer-events-auto relative w-full h-(--workflow-tabs-height)"
       >
         <!-- Native drag area for Electron -->
         <div
@@ -21,7 +21,7 @@
         </div>
       </div>
     </template>
-    <template v-if="showUI" #side-toolbar>
+    <template v-if="showUI && !isBuilderMode" #side-toolbar>
       <SideToolbar />
     </template>
     <template v-if="showUI" #side-bar-panel>
@@ -31,19 +31,25 @@
         <ExtensionSlot v-if="activeSidebarTab" :extension="activeSidebarTab" />
       </div>
     </template>
-    <template v-if="showUI" #topmenu>
+    <template v-if="showUI && !isBuilderMode" #topmenu>
       <TopMenuSection />
     </template>
     <template v-if="showUI" #bottom-panel>
       <BottomPanel />
     </template>
     <template v-if="showUI" #right-side-panel>
-      <NodePropertiesPanel />
+      <AppBuilder v-if="mode === 'builder:select'" />
+      <NodePropertiesPanel v-else-if="!isBuilderMode" />
     </template>
     <template #graph-canvas-panel>
-      <GraphCanvasMenu v-if="canvasMenuEnabled" class="pointer-events-auto" />
+      <GraphCanvasMenu
+        v-if="canvasMenuEnabled && !isBuilderMode"
+        class="pointer-events-auto"
+      />
       <MiniMap
-        v-if="comfyAppReady && minimapEnabled && betaMenuEnabled"
+        v-if="
+          comfyAppReady && minimapEnabled && betaMenuEnabled && !isBuilderMode
+        "
         class="pointer-events-auto"
       />
     </template>
@@ -121,6 +127,7 @@ import { isMiddlePointerInput } from '@/base/pointerUtils'
 import LiteGraphCanvasSplitterOverlay from '@/components/LiteGraphCanvasSplitterOverlay.vue'
 import TopMenuSection from '@/components/TopMenuSection.vue'
 import BottomPanel from '@/components/bottomPanel/BottomPanel.vue'
+import AppBuilder from '@/components/builder/AppBuilder.vue'
 import ExtensionSlot from '@/components/common/ExtensionSlot.vue'
 import DomWidgets from '@/components/graph/DomWidgets.vue'
 import GraphCanvasMenu from '@/components/graph/GraphCanvasMenu.vue'
@@ -174,6 +181,7 @@ import { useExecutionErrorStore } from '@/stores/executionErrorStore'
 import { useNodeDefStore } from '@/stores/nodeDefStore'
 import { useColorPaletteStore } from '@/stores/workspace/colorPaletteStore'
 import { useSearchBoxStore } from '@/stores/workspace/searchBoxStore'
+import { useAppMode } from '@/composables/useAppMode'
 import { useWorkspaceStore } from '@/stores/workspaceStore'
 import { isNativeWindow } from '@/utils/envUtil'
 import { forEachNode } from '@/utils/graphTraversalUtil'
@@ -194,6 +202,7 @@ const nodeSearchboxPopoverRef = shallowRef<InstanceType<
 const settingStore = useSettingStore()
 const nodeDefStore = useNodeDefStore()
 const workspaceStore = useWorkspaceStore()
+const { mode, isBuilderMode } = useAppMode()
 const canvasStore = useCanvasStore()
 const workflowStore = useWorkflowStore()
 const executionStore = useExecutionStore()

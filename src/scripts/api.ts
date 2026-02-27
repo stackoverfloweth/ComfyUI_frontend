@@ -5,6 +5,7 @@ import { trimEnd } from 'es-toolkit'
 import { ref } from 'vue'
 
 import defaultClientFeatureFlags from '@/config/clientFeatureFlags.json' with { type: 'json' }
+import { getDevOverride } from '@/utils/devFeatureFlagOverride'
 import type {
   ModelFile,
   ModelFolderInfo
@@ -471,6 +472,23 @@ export class ComfyApi extends EventTarget {
     callback: ((event: ApiEvents[TEvent]) => void) | null,
     options?: EventListenerOptions | boolean
   ): void {
+    super.removeEventListener(type, callback as EventListener, options)
+  }
+
+  addCustomEventListener(
+    type: string,
+    callback: ((event: CustomEvent<unknown>) => void) | null,
+    options?: AddEventListenerOptions | boolean
+  ) {
+    super.addEventListener(type, callback as EventListener, options)
+    this._registered.add(type)
+  }
+
+  removeCustomEventListener(
+    type: string,
+    callback: ((event: CustomEvent<unknown>) => void) | null,
+    options?: EventListenerOptions | boolean
+  ) {
     super.removeEventListener(type, callback as EventListener, options)
   }
 
@@ -1299,6 +1317,8 @@ export class ComfyApi extends EventTarget {
    * @returns true if the feature is supported, false otherwise
    */
   serverSupportsFeature(featureName: string): boolean {
+    const override = getDevOverride<boolean>(featureName)
+    if (override !== undefined) return override
     return get(this.serverFeatureFlags.value, featureName) === true
   }
 
@@ -1309,6 +1329,8 @@ export class ComfyApi extends EventTarget {
    * @returns The feature value or default
    */
   getServerFeature<T = unknown>(featureName: string, defaultValue?: T): T {
+    const override = getDevOverride<T>(featureName)
+    if (override !== undefined) return override
     return get(this.serverFeatureFlags.value, featureName, defaultValue) as T
   }
 

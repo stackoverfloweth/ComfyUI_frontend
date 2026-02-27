@@ -313,10 +313,6 @@ export class TaskItemImpl {
     return this.jobId + this.displayStatus
   }
 
-  get queueIndex() {
-    return this.job.priority
-  }
-
   get jobId() {
     return this.job.id
   }
@@ -480,6 +476,7 @@ export const useQueueStore = defineStore('queue', () => {
   const runningTasks = shallowRef<TaskItemImpl[]>([])
   const pendingTasks = shallowRef<TaskItemImpl[]>([])
   const historyTasks = shallowRef<TaskItemImpl[]>([])
+  const hasFetchedHistorySnapshot = ref(false)
   const maxHistoryItems = ref(64)
   const isLoading = ref(false)
 
@@ -499,8 +496,8 @@ export const useQueueStore = defineStore('queue', () => {
     tasks.value.flatMap((task: TaskItemImpl) => task.flatten())
   )
 
-  const lastHistoryQueueIndex = computed<number>(() =>
-    historyTasks.value.length ? historyTasks.value[0].queueIndex : -1
+  const lastJobHistoryPriority = computed<number>(() =>
+    historyTasks.value.length ? historyTasks.value[0].job.priority : -1
   )
 
   const hasPendingTasks = computed<boolean>(() => pendingTasks.value.length > 0)
@@ -585,7 +582,7 @@ export const useQueueStore = defineStore('queue', () => {
         currentHistory.map((impl) => [impl.jobId, impl])
       )
 
-      historyTasks.value = sortedHistory.map((job) => {
+      const nextHistoryTasks = sortedHistory.map((job) => {
         const existing = existingByJobId.get(job.id)
         if (!existing) return new TaskItemImpl(job)
         // Recreate if outputs_count changed to ensure lazy loading works
@@ -594,6 +591,15 @@ export const useQueueStore = defineStore('queue', () => {
         }
         return existing
       })
+
+      const isHistoryUnchanged =
+        nextHistoryTasks.length === currentHistory.length &&
+        nextHistoryTasks.every((task, index) => task === currentHistory[index])
+
+      if (!isHistoryUnchanged) {
+        historyTasks.value = nextHistoryTasks
+      }
+      hasFetchedHistorySnapshot.value = true
     } finally {
       // Only clear loading if this is the latest request.
       // A stale request completing (success or error) should not touch loading state
@@ -623,12 +629,13 @@ export const useQueueStore = defineStore('queue', () => {
     runningTasks,
     pendingTasks,
     historyTasks,
+    hasFetchedHistorySnapshot,
     maxHistoryItems,
     isLoading,
 
     tasks,
     flatTasks,
-    lastHistoryQueueIndex,
+    lastJobHistoryPriority,
     hasPendingTasks,
     activeJobsCount,
 

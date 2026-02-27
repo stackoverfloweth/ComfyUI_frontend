@@ -9,7 +9,7 @@ import {
   DEFAULT_LIGHT_COLOR_PALETTE
 } from '@/constants/coreColorPalettes'
 
-import { tryToggleWidgetPromotion } from '@/core/graph/subgraph/proxyWidgetUtils'
+import { tryToggleWidgetPromotion } from '@/core/graph/subgraph/promotionUtils'
 import { t } from '@/i18n'
 import {
   LGraphEventMode,
@@ -1338,8 +1338,6 @@ export function useCoreCommands(): ComfyCommand[] {
           typeof metadata?.source === 'string' ? metadata.source : 'keybind'
         const newMode = !canvasStore.linearMode
         if (newMode) useTelemetry()?.trackEnterLinear({ source })
-        app.rootGraph.extra.linearMode = newMode
-        workflowStore.activeWorkflow?.changeTracker?.checkState()
         canvasStore.linearMode = newMode
       }
     }

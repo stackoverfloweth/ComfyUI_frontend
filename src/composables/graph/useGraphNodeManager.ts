@@ -6,13 +6,15 @@ import { reactiveComputed } from '@vueuse/core'
 import { reactive, shallowReactive } from 'vue'
 
 import { useChainCallback } from '@/composables/functional/useChainCallback'
-import { isProxyWidget } from '@/core/graph/subgraph/proxyWidget'
+import { isPromotedWidgetView } from '@/core/graph/subgraph/promotedWidgetTypes'
+import { resolvePromotedWidgetSource } from '@/core/graph/subgraph/resolvePromotedWidgetSource'
 import type {
   INodeInputSlot,
   INodeOutputSlot
 } from '@/lib/litegraph/src/interfaces'
 import type { IBaseWidget } from '@/lib/litegraph/src/types/widgets'
 import { useLayoutMutations } from '@/renderer/core/layout/operations/layoutMutations'
+import { layoutStore } from '@/renderer/core/layout/store/layoutStore'
 import { LayoutSource } from '@/renderer/core/layout/types'
 import type { NodeId } from '@/renderer/core/layout/types'
 import type { InputSpec } from '@/schemas/nodeDef/nodeDefSchemaV2'
@@ -68,6 +70,12 @@ export interface SafeWidgetData {
   spec?: InputSpec
   /** Input slot metadata (index and link status) */
   slotMetadata?: WidgetSlotMetadata
+  /**
+   * Original LiteGraph widget name used for slot metadata matching.
+   * For promoted widgets, `name` is `sourceWidgetName` (interior widget name)
+   * which differs from the subgraph node's input slot widget name.
+   */
+  slotName?: string
 }
 
 export interface VueNodeData {
@@ -108,7 +116,21 @@ export interface GraphNodeManager {
   cleanup(): void
 }
 
-function getControlWidget(widget: IBaseWidget): SafeControlWidget | undefined {
+function isPromotedDOMWidget(widget: IBaseWidget): boolean {
+  if (!isPromotedWidgetView(widget)) return false
+  const sourceWidget = resolvePromotedWidgetSource(widget.node, widget)
+  if (!sourceWidget) return false
+
+  const innerWidget = sourceWidget.widget
+  return (
+    ('element' in innerWidget && !!innerWidget.element) ||
+    ('component' in innerWidget && !!innerWidget.component)
+  )
+}
+
+export function getControlWidget(
+  widget: IBaseWidget
+): SafeControlWidget | undefined {
   const cagWidget = widget.linkedWidgets?.find(
     (w) => w.name == 'control_after_generate'
   )
@@ -119,22 +141,12 @@ function getControlWidget(widget: IBaseWidget): SafeControlWidget | undefined {
   }
 }
 
-/**
- * Shared widget enhancements used by both safeWidgetMapper and Right Side Panel
- */
 interface SharedWidgetEnhancements {
-  /** Control widget for seed randomization/increment/decrement */
   controlWidget?: SafeControlWidget
-  /** Input specification from node definition */
   spec?: InputSpec
 }
 
-/**
- * Extracts common widget enhancements shared across different rendering contexts.
- * This function centralizes the logic for extracting metadata from widgets.
- * Note: Value and metadata (label, options, hidden, etc.) are accessed via widgetValueStore.
- */
-export function getSharedWidgetEnhancements(
+function getSharedWidgetEnhancements(
   node: LGraphNode,
   widget: IBaseWidget
 ): SharedWidgetEnhancements {
@@ -199,6 +211,9 @@ function safeWidgetMapper(
         node.widgets?.forEach((w) => w.triggerDraw?.())
       }
 
+      const isPromotedPseudoWidget =
+        isPromotedWidgetView(widget) && widget.sourceWidgetName.startsWith('$$')
+
       // Extract only render-critical options (canvasOnly, advanced, read_only)
       const options = widget.options
         ? {
@@ -210,13 +225,13 @@ function safeWidgetMapper(
         : undefined
       const subgraphId = node.isSubgraphNode() && node.subgraph.id
 
-      const localId = isProxyWidget(widget)
-        ? widget._overlay?.nodeId
+      const localId = isPromotedWidgetView(widget)
+        ? widget.sourceNodeId
         : undefined
       const nodeId =
         subgraphId && localId ? `${subgraphId}:${localId}` : undefined
-      const name = isProxyWidget(widget)
-        ? widget._overlay.widgetName
+      const name = isPromotedWidgetView(widget)
+        ? widget.sourceWidgetName
         : widget.name
 
       return {
@@ -226,9 +241,12 @@ function safeWidgetMapper(
         ...sharedEnhancements,
         callback,
         hasLayoutSize: typeof widget.computeLayoutSize === 'function',
-        isDOMWidget: isDOMWidget(widget),
-        options,
-        slotMetadata: slotInfo
+        isDOMWidget: isDOMWidget(widget) || isPromotedDOMWidget(widget),
+        options: isPromotedPseudoWidget
+          ? { ...options, canvasOnly: true }
+          : options,
+        slotMetadata: slotInfo,
+        slotName: name !== widget.name ? widget.name : undefined
       }
     } catch (error) {
       return {
@@ -249,15 +267,40 @@ export function extractVueNodeData(node: LGraphNode): VueNodeData {
   // Extract safe widget data
   const slotMetadata = new Map<string, WidgetSlotMetadata>()
 
+  const existingWidgetsDescriptor = Object.getOwnPropertyDescriptor(
+    node,
+    'widgets'
+  )
   const reactiveWidgets = shallowReactive<IBaseWidget[]>(node.widgets ?? [])
-  Object.defineProperty(node, 'widgets', {
-    get() {
-      return reactiveWidgets
-    },
-    set(v) {
-      reactiveWidgets.splice(0, reactiveWidgets.length, ...v)
-    }
-  })
+  if (existingWidgetsDescriptor?.get) {
+    // Node has a custom widgets getter (e.g. SubgraphNode's synthetic getter).
+    // Preserve it but sync results into a reactive array for Vue.
+    const originalGetter = existingWidgetsDescriptor.get
+    Object.defineProperty(node, 'widgets', {
+      get() {
+        const current: IBaseWidget[] = originalGetter.call(node) ?? []
+        if (
+          current.length !== reactiveWidgets.length ||
+          current.some((w, i) => w !== reactiveWidgets[i])
+        ) {
+          reactiveWidgets.splice(0, reactiveWidgets.length, ...current)
+        }
+        return reactiveWidgets
+      },
+      set: existingWidgetsDescriptor.set ?? (() => {}),
+      configurable: true,
+      enumerable: true
+    })
+  } else {
+    Object.defineProperty(node, 'widgets', {
+      get() {
+        return reactiveWidgets
+      },
+      set(v) {
+        reactiveWidgets.splice(0, reactiveWidgets.length, ...v)
+      }
+    })
+  }
   const reactiveInputs = shallowReactive<INodeInputSlot[]>(node.inputs ?? [])
   Object.defineProperty(node, 'inputs', {
     get() {
@@ -341,7 +384,7 @@ export function useGraphNodeManager(graph: LGraph): GraphNodeManager {
 
     // Update only widgets with new slot metadata, keeping other widget data intact
     for (const widget of currentData.widgets ?? []) {
-      const slotInfo = slotMetadata.get(widget.name)
+      const slotInfo = slotMetadata.get(widget.slotName ?? widget.name)
       if (slotInfo) widget.slotMetadata = slotInfo
     }
   }
@@ -399,6 +442,11 @@ export function useGraphNodeManager(graph: LGraph): GraphNodeManager {
       // Extract actual positions after configure() has potentially updated them
       const nodePosition = { x: node.pos[0], y: node.pos[1] }
       const nodeSize = { width: node.size[0], height: node.size[1] }
+
+      // Skip layout creation if it already exists
+      // (e.g. in-place node replacement where the old node's layout is reused for the new node with the same ID).
+      const existingLayout = layoutStore.getNodeLayoutRef(id).value
+      if (existingLayout) return
 
       // Add node to layout store with final positions
       setSource(LayoutSource.Canvas)
