@@ -25,7 +25,7 @@
             total: imageUrls.length
           })
         "
-        @click="selectGridImage(index)"
+        @click="openImageInGallery(index)"
       >
         <img
           :src="url"
@@ -261,7 +261,9 @@ const { start: startDelayedLoader, stop: stopDelayedLoader } = useTimeoutFn(
 )
 
 // Computed values
-const currentImageUrl = computed(() => props.imageUrls[currentIndex.value])
+const currentImageUrl = computed(
+  () => props.imageUrls[currentIndex.value] ?? ''
+)
 const hasMultipleImages = computed(() => props.imageUrls.length > 1)
 const imageAltText = computed(() => `Node output ${currentIndex.value + 1}`)
 const gridCols = computed(() => {
@@ -334,7 +336,7 @@ const handleDownload = () => {
   } catch {
     useToast().add({
       severity: 'error',
-      summary: 'Error',
+      summary: t('g.error'),
       detail: t('g.failedToDownloadImage'),
       life: 3000,
       group: 'image-preview'
@@ -356,7 +358,7 @@ const setCurrentIndex = (index: number) => {
   }
 }
 
-function selectGridImage(index: number) {
+function openImageInGallery(index: number) {
   setCurrentIndex(index)
   viewMode.value = 'gallery'
 }
