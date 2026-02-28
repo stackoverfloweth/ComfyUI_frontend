@@ -204,11 +204,13 @@ const contextMenuItems = computed<WorkflowMenuItem[]>(() => [
   ...baseMenuItems.value,
   { separator: true },
   {
+    id: 'close-tab',
     label: t('tabMenu.closeTab'),
     icon: 'pi pi-times',
     command: () => onCloseWorkflow(props.workflowOption)
   },
   {
+    id: 'close-tabs-to-left',
     label: t('tabMenu.closeTabsToLeft'),
     overlayIcon: {
       mainIcon: 'pi pi-times',
@@ -221,6 +223,7 @@ const contextMenuItems = computed<WorkflowMenuItem[]>(() => [
     disabled: props.isFirst
   },
   {
+    id: 'close-tabs-to-right',
     label: t('tabMenu.closeTabsToRight'),
     overlayIcon: {
       mainIcon: 'pi pi-times',
@@ -233,6 +236,7 @@ const contextMenuItems = computed<WorkflowMenuItem[]>(() => [
     disabled: props.isLast
   },
   {
+    id: 'close-other-tabs',
     label: t('tabMenu.closeOtherTabs'),
     overlayIcon: {
       mainIcon: 'pi pi-times',
