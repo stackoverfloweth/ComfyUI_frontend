@@ -45,7 +45,8 @@ const props = defineProps<{
   mobile?: boolean
 }>()
 
-const jobFinishedQueue = ref(true)
+//NOTE: due to batching, will never be greater than 2
+const pendingJobQueues = ref(0)
 const { ready: jobToastTimeout, start: resetJobToastTimeout } = useTimeout(
   5000,
   { controls: true, immediate: false }
@@ -148,9 +149,8 @@ const batchCountWidget: SimplifiedWidget<number> = {
 //TODO: refactor out of this file.
 //code length is small, but changes should propagate
 async function runButtonClick(e: Event) {
-  if (!jobFinishedQueue.value) return
   try {
-    jobFinishedQueue.value = false
+    pendingJobQueues.value += 1
     resetJobToastTimeout()
     const isShiftPressed = 'shiftKey' in e && e.shiftKey
     const commandId = isShiftPressed
@@ -170,7 +170,7 @@ async function runButtonClick(e: Event) {
     })
   } finally {
     //TODO: Error state indicator for failed queue?
-    jobFinishedQueue.value = true
+    pendingJobQueues.value -= 1
   }
 }
 
@@ -318,7 +318,7 @@ defineExpose({ runButtonClick })
     </div>
   </div>
   <Teleport
-    v-if="(!jobToastTimeout || !jobFinishedQueue) && toastTo"
+    v-if="(!jobToastTimeout || pendingJobQueues > 0) && toastTo"
     defer
     :to="toastTo"
   >
@@ -326,13 +326,15 @@ defineExpose({ runButtonClick })
       class="bg-secondary-background text-base-foreground rounded-lg flex h-8 p-1 pr-2 gap-2 items-center"
     >
       <i
-        v-if="jobFinishedQueue"
+        v-if="pendingJobQueues === 0"
         class="icon-[lucide--check] size-5 text-muted-foreground"
       />
       <i v-else class="icon-[lucide--loader-circle] size-4 animate-spin" />
       <span
         v-text="
-          jobFinishedQueue ? t('queue.jobAddedToQueue') : t('queue.jobQueueing')
+          pendingJobQueues === 0
+            ? t('queue.jobAddedToQueue')
+            : t('queue.jobQueueing')
         "
       />
     </div>
