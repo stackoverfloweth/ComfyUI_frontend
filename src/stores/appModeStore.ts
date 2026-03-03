@@ -11,7 +11,7 @@ import { app } from '@/scripts/app'
 export const useAppModeStore = defineStore('appMode', () => {
   const { getCanvas } = useCanvasStore()
   const workflowStore = useWorkflowStore()
-  const { mode, setMode, isBuilderMode } = useAppMode()
+  const { mode, setMode, isBuilderMode, isSelectMode } = useAppMode()
 
   const selectedInputs = reactive<[NodeId, string][]>([])
   const selectedOutputs = reactive<NodeId[]>([])
@@ -61,16 +61,13 @@ export const useAppModeStore = defineStore('appMode', () => {
     { deep: true }
   )
 
-  watch(
-    () => mode.value === 'builder:select',
-    (inSelect) => (getCanvas().read_only = inSelect)
-  )
+  watch(isSelectMode, (inSelect) => (getCanvas().read_only = inSelect))
 
   function enterBuilder() {
     setMode(
       mode.value === 'app' && hasOutputs.value
         ? 'builder:arrange'
-        : 'builder:select'
+        : 'builder:inputs'
     )
   }
 

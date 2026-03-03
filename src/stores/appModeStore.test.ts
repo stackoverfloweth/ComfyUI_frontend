@@ -24,7 +24,7 @@ vi.mock('@/renderer/core/canvas/canvasStore', () => ({
 import { useAppModeStore } from './appModeStore'
 
 function createBuilderWorkflow(
-  activeMode: string = 'builder:select'
+  activeMode: string = 'builder:inputs'
 ): LoadedComfyWorkflow {
   const workflow = new ComfyWorkflowClass({
     path: 'workflows/test.json',
@@ -58,7 +58,7 @@ describe('appModeStore', () => {
       expect(workflowStore.activeWorkflow!.activeMode).toBe('builder:arrange')
     })
 
-    it('navigates to builder:select when in app mode without outputs', () => {
+    it('navigates to builder:inputs when in app mode without outputs', () => {
       const workflowStore = useWorkflowStore()
       workflowStore.activeWorkflow = createBuilderWorkflow('app')
 
@@ -66,10 +66,10 @@ describe('appModeStore', () => {
 
       store.enterBuilder()
 
-      expect(workflowStore.activeWorkflow!.activeMode).toBe('builder:select')
+      expect(workflowStore.activeWorkflow!.activeMode).toBe('builder:inputs')
     })
 
-    it('navigates to builder:select when in graph mode with outputs', () => {
+    it('navigates to builder:inputs when in graph mode with outputs', () => {
       const workflowStore = useWorkflowStore()
       workflowStore.activeWorkflow = createBuilderWorkflow('graph')
 
@@ -78,10 +78,10 @@ describe('appModeStore', () => {
 
       store.enterBuilder()
 
-      expect(workflowStore.activeWorkflow!.activeMode).toBe('builder:select')
+      expect(workflowStore.activeWorkflow!.activeMode).toBe('builder:inputs')
     })
 
-    it('navigates to builder:select when in graph mode without outputs', () => {
+    it('navigates to builder:inputs when in graph mode without outputs', () => {
       const workflowStore = useWorkflowStore()
       workflowStore.activeWorkflow = createBuilderWorkflow('graph')
 
@@ -89,7 +89,7 @@ describe('appModeStore', () => {
 
       store.enterBuilder()
 
-      expect(workflowStore.activeWorkflow!.activeMode).toBe('builder:select')
+      expect(workflowStore.activeWorkflow!.activeMode).toBe('builder:inputs')
     })
   })
 

@@ -7,16 +7,20 @@
       class="inline-flex items-center gap-1 rounded-2xl border border-border-default bg-base-background p-2 shadow-interface"
     >
       <template
-        v-for="(step, index) in [selectStep, arrangeStep]"
+        v-for="(step, index) in [
+          selectInputsStep,
+          selectOutputsStep,
+          arrangeStep
+        ]"
         :key="step.id"
       >
         <button
           :class="
             cn(
               stepClasses,
-              activeStep === step.id && 'bg-interface-builder-mode-background',
-              activeStep !== step.id &&
-                'hover:bg-secondary-background bg-transparent'
+              activeStep === step.id
+                ? 'bg-interface-builder-mode-background'
+                : 'hover:bg-secondary-background bg-transparent'
             )
           "
           :aria-current="activeStep === step.id ? 'step' : undefined"
@@ -32,8 +36,8 @@
       <!-- Default view -->
       <ConnectOutputPopover
         v-if="!hasOutputs"
-        :is-select-active="activeStep === 'builder:select'"
-        @switch="setMode('builder:select')"
+        :is-select-active="!settingView && isSelectMode"
+        @switch="setMode('builder:inputs')"
       >
         <button :class="cn(stepClasses, 'opacity-30 bg-transparent')">
           <StepBadge
@@ -49,7 +53,7 @@
         :class="
           cn(
             stepClasses,
-            activeStep === 'setDefaultView'
+            settingView
               ? 'bg-interface-builder-mode-background'
               : 'hover:bg-secondary-background bg-transparent'
           )
@@ -84,7 +88,7 @@ import type { BuilderToolbarStep } from './types'
 import { useAppSetDefaultView } from './useAppSetDefaultView'
 
 const { t } = useI18n()
-const { mode, setMode } = useAppMode()
+const { mode, setMode, isSelectMode } = useAppMode()
 const { hasOutputs } = storeToRefs(useAppModeStore())
 const { settingView, showDialog } = useAppSetDefaultView()
 
@@ -95,10 +99,17 @@ const activeStep = computed(() =>
 const stepClasses =
   'inline-flex h-14 min-h-8 cursor-pointer items-center gap-3 rounded-lg py-2 pr-4 pl-2 transition-colors border-none'
 
-const selectStep: BuilderToolbarStep<AppMode> = {
-  id: 'builder:select',
-  title: t('builderToolbar.select'),
-  subtitle: t('builderToolbar.selectDescription'),
+const selectInputsStep: BuilderToolbarStep<AppMode> = {
+  id: 'builder:inputs',
+  title: t('builderToolbar.inputs'),
+  subtitle: t('builderToolbar.inputsDescription'),
+  icon: 'icon-[lucide--mouse-pointer-click]'
+}
+
+const selectOutputsStep: BuilderToolbarStep<AppMode> = {
+  id: 'builder:outputs',
+  title: t('builderToolbar.outputs'),
+  subtitle: t('builderToolbar.outputsDescription'),
   icon: 'icon-[lucide--mouse-pointer-click]'
 }
 
