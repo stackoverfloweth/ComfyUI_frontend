@@ -102,6 +102,7 @@
           :show-asset-names="showAssetNames"
           :show-asset-details="showAssetDetails"
           @select-asset="handleAssetSelect"
+          @preview-asset="handleZoomClick"
           @context-menu="handleAssetContextMenu"
           @approach-end="handleApproachEnd"
         />
@@ -224,10 +225,6 @@ import {
 import { useI18n } from 'vue-i18n'
 
 import NoResultsPlaceholder from '@/components/common/NoResultsPlaceholder.vue'
-// Lazy-loaded to avoid pulling THREE.js into the main bundle
-const Load3dViewerContent = defineAsyncComponent(
-  () => import('@/components/load3d/Load3dViewerContent.vue')
-)
 import AssetsSidebarGridView from '@/components/sidebar/tabs/AssetsSidebarGridView.vue'
 import AssetsSidebarListView from '@/components/sidebar/tabs/AssetsSidebarListView.vue'
 import SidebarTabTemplate from '@/components/sidebar/tabs/SidebarTabTemplate.vue'
@@ -264,6 +261,10 @@ import {
   isPreviewableMediaType
 } from '@/utils/formatUtil'
 import { cn } from '@/utils/tailwindUtil'
+
+const Load3dViewerContent = defineAsyncComponent(
+  () => import('@/components/load3d/Load3dViewerContent.vue')
+)
 
 const { t } = useI18n()
 

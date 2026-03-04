@@ -60,6 +60,8 @@
             @mouseleave="onAssetLeave(item.asset.id)"
             @contextmenu.prevent.stop="emit('context-menu', $event, item.asset)"
             @click.stop="emit('select-asset', item.asset, selectableAssets)"
+            @dblclick.stop="emit('preview-asset', item.asset)"
+            @preview-click="emit('preview-asset', item.asset)"
             @stack-toggle="void toggleStack(item.asset)"
           >
             <template v-if="hoveredAssetId === item.asset.id" #actions>
@@ -126,6 +128,7 @@ const assetsStore = useAssetsStore()
 
 const emit = defineEmits<{
   (e: 'select-asset', asset: AssetItem, assets?: AssetItem[]): void
+  (e: 'preview-asset', asset: AssetItem): void
   (e: 'context-menu', event: MouseEvent, asset: AssetItem): void
   (e: 'approach-end'): void
 }>()
